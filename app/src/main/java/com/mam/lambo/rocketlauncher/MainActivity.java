@@ -5,6 +5,9 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -54,6 +57,9 @@ public class MainActivity extends Activity {
         File directory = getExternalFilesDir(null);
         File file = new File(directory, nautobahnFilename);
         if (file.exists()) {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            MediaPlayer mp = MediaPlayer.create(context, notification);
+            mp.start();
             startNautobahn();
         }
     }
@@ -64,6 +70,10 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         context = getApplicationContext();
+
+        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+        MediaPlayer mp = MediaPlayer.create(context, notification);
+        mp.start();
 
         Intent intent = new Intent("com.nauto.apis.NautoAPIManager.BIND_SERVICE")
             .setClassName("com.nauto.apis", "com.nauto.apis.NautoAPIManager");
