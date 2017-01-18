@@ -60,6 +60,15 @@ public class MainActivity extends Activity {
         File directory = getExternalFilesDir(null);
         File file = new File(directory, nautobahnFilename);
         if (file.exists()) {
+//            int i;
+//            for (i=0;i<30;++i) {
+//                rotateLed();
+//                try {
+//                    Thread.sleep(100);
+//                } catch (InterruptedException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             MediaPlayer mp = MediaPlayer.create(context, notification);
             mp.start();
