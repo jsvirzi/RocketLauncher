@@ -17,17 +17,17 @@ public class StartMyActivityAtBootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
 
-//        MediaPlayer mediaPlayer = new MediaPlayer();
-//        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_NOTIFICATIONS);
-//        String filePath = String.format("%s/beep-07.wav", dirPath);
-//        mediaPlayer.reset();
-//        try {
-//            mediaPlayer.setDataSource(filePath);
-//            mediaPlayer.prepare();
-//            mediaPlayer.start();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_NOTIFICATIONS);
+        String filePath = String.format("%s/beep-07.wav", dirPath);
+        mediaPlayer.reset();
+        try {
+            mediaPlayer.setDataSource(filePath);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
 
 //        if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
