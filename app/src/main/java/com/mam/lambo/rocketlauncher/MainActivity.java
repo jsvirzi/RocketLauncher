@@ -1,6 +1,7 @@
 package com.mam.lambo.rocketlauncher;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,16 +26,17 @@ import java.io.FileOutputStream;
 public class MainActivity extends Activity {
 
     private static final String TAG = "RocketLauncher";
-    CheckBox checkBoxAutoLaunchNautobahn;
-    Button buttonExit;
-    Button buttonStartNautobahn;
-    Button buttonStopNautobahn;
-    Button buttonStartFan;
-    Button buttonStopFan;
-    Button buttonLed;
-    String nautobahnFilename = "nautobahn.txt";
+    private CheckBox checkBoxAutoLaunchNautobahn;
+    private Button buttonExit;
+    private Button buttonStartNautobahn;
+    private Button buttonStopNautobahn;
+    private Button buttonStartFan;
+    private Button buttonStopFan;
+    private Button buttonLed;
+    private String nautobahnFilename = "nautobahn.txt";
     private INautoAPIManager apiService;
     private Context context;
+    public static MainActivity mainActivity;
 
     public void startNautobahn() {
         Intent intent = new Intent();
@@ -65,12 +67,53 @@ public class MainActivity extends Activity {
         }
     }
 
+    private int ledPhase = 0;
+    public void rotateLed() {
+        switch (ledPhase) {
+            case 0:
+                try {
+                    apiService.setLedRGBLevel(0, 255, 0, 0);
+                    apiService.setLedRGBLevel(1, 0, 255, 0);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                ++ledPhase;
+                ledPhase = (ledPhase + 1) % 3;
+                break;
+            case 1:
+                try {
+                    apiService.setLedRGBLevel(0, 0, 255, 0);
+                    apiService.setLedRGBLevel(1, 0, 0, 255);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                ++ledPhase;
+                ledPhase = (ledPhase + 1) % 3;
+                break;
+            case 2:
+                try {
+                    apiService.setLedRGBLevel(0, 0, 0, 255);
+                    apiService.setLedRGBLevel(1, 255, 0, 0);
+                } catch (RemoteException ex) {
+                    ex.printStackTrace();
+                }
+                ++ledPhase;
+                ledPhase = (ledPhase + 1) % 3;
+                break;
+            default:
+                ledPhase = 0;
+                break;
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         context = getApplicationContext();
+
+        mainActivity = this;
 
         Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
         MediaPlayer mp = MediaPlayer.create(context, notification);

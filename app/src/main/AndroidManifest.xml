@@ -25,6 +25,15 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name="com.mam.lambo.rocketlauncher.ExternalIntentProcessor"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.nautobahn.hereiam" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
