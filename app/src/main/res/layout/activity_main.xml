@@ -61,6 +61,13 @@
         <Button
             android:layout_width="200sp"
             android:layout_height="40sp"
+            android:text="led"
+            android:id="@+id/led"
+            />
+
+        <Button
+            android:layout_width="200sp"
+            android:layout_height="40sp"
             android:text="exit"
             android:id="@+id/exit"
             />

@@ -28,6 +28,7 @@ public class MainActivity extends Activity {
     Button buttonStopNautobahn;
     Button buttonStartFan;
     Button buttonStopFan;
+    Button buttonLed;
     String nautobahnFilename = "nautobahn.txt";
     private INautoAPIManager apiService;
     private Context context;
@@ -68,6 +69,40 @@ public class MainActivity extends Activity {
         Intent intent = new Intent("com.nauto.apis.NautoAPIManager.BIND_SERVICE")
             .setClassName("com.nauto.apis", "com.nauto.apis.NautoAPIManager");
         bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        buttonLed = (Button) findViewById(R.id.led);
+        buttonLed.setTag(1);
+        buttonLed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int action = (int) buttonLed.getTag();
+                if (action == 1) {
+                    try {
+                        apiService.setLedRGBLevel(0, 255, 0, 0);
+                        apiService.setLedRGBLevel(1, 255, 0, 0);
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                    }
+                    buttonLed.setTag(2);
+                } else if (action == 2) {
+                    try {
+                        apiService.setLedRGBLevel(0, 0, 255, 0);
+                        apiService.setLedRGBLevel(1, 0, 255, 0);
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                    }
+                    buttonLed.setTag(3);
+                } else if (action == 3) {
+                    try {
+                        apiService.setLedRGBLevel(0, 0, 0, 255);
+                        apiService.setLedRGBLevel(1, 0, 0, 255);
+                    } catch (RemoteException ex) {
+                        ex.printStackTrace();
+                    }
+                    buttonLed.setTag(1);
+                }
+            }
+        });
 
         buttonStartNautobahn = (Button) findViewById(R.id.startNautobahn);
         buttonStartNautobahn.setOnClickListener(new View.OnClickListener() {
