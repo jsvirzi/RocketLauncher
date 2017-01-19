@@ -58,12 +58,22 @@ public class MainActivity extends Activity {
         context.sendBroadcast(intent);
     }
 
+    private boolean autoLaunchingNautobahn() {
+        File directory = getExternalFilesDir(null);
+        File file = new File(directory, nautobahnFilename);
+        try {
+            String msg = String.format("looking for file [%s]", file.getCanonicalFile().toString());
+            textViewStatus.setText(msg);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return file.exists();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        File directory = getExternalFilesDir(null);
-        File file = new File(directory, nautobahnFilename);
-        if (automaticBoot && file.exists()) {
+        if (automaticBoot && autoLaunchingNautobahn()) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             MediaPlayer mp = MediaPlayer.create(context, notification);
             mp.start();
@@ -162,6 +172,7 @@ public class MainActivity extends Activity {
         });
 
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
+        checkBoxAutoLaunchNautobahn.setChecked(autoLaunchingNautobahn());
         checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
