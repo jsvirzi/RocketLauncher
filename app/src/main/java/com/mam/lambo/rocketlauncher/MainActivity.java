@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             MediaPlayer mp = MediaPlayer.create(context, notification);
             mp.start();
-            automaticBoot = true;
+            automaticBoot = false;
         } else {
             File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
             MediaPlayer mediaPlayer = new MediaPlayer();
@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            automaticBoot = false;
+            automaticBoot = true;
         }
 
         buttonLed = (Button) findViewById(R.id.led);
