@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
 
 //        mainActivity = this;
 
-        if (rocketLauncher.getOnBootIntentsReceived() > 0) {
+        if (rocketLauncher.getOnBootIntentsReceived() == 0) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
             MediaPlayer mp = MediaPlayer.create(context, notification);
             mp.start();
