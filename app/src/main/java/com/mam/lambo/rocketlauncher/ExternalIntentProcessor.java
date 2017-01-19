@@ -17,9 +17,9 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() == "com.nautobahn.hereiam") {
             Log.d(TAG, "received intent: com.nautobahn.hereiam");
-            MainActivity mainActivity = MainActivity.mainActivity;
-            if (mainActivity != null) {
-                mainActivity.rotateLed();
+            RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+            if (rocketLauncher != null) {
+                rocketLauncher.rotateLed();
             }
         }
     }

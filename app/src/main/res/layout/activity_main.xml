@@ -72,6 +72,13 @@
             android:id="@+id/exit"
             />
 
+        <TextView
+            android:layout_width="200sp"
+            android:layout_height="40sp"
+            android:text="status"
+            android:id="@+id/status"
+            />
+
     </LinearLayout>
 
 </RelativeLayout>

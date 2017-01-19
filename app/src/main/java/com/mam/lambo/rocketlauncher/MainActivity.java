@@ -10,18 +10,21 @@ import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.nauto.apis.INautoAPIManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends Activity {
 
@@ -34,9 +37,10 @@ public class MainActivity extends Activity {
     private Button buttonStopFan;
     private Button buttonLed;
     private String nautobahnFilename = "nautobahn.txt";
-    private INautoAPIManager apiService;
     private Context context;
-    public static MainActivity mainActivity;
+//    public static MainActivity mainActivity;
+    private boolean automaticBoot;
+    private TextView textViewStatus;
 
     public void startNautobahn() {
         Intent intent = new Intent();
@@ -59,50 +63,14 @@ public class MainActivity extends Activity {
         super.onStart();
         File directory = getExternalFilesDir(null);
         File file = new File(directory, nautobahnFilename);
-        if (file.exists()) {
+        if (automaticBoot && file.exists()) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             MediaPlayer mp = MediaPlayer.create(context, notification);
             mp.start();
             startNautobahn();
-        }
-    }
-
-    private int ledPhase = 0;
-    public void rotateLed() {
-        switch (ledPhase) {
-            case 0:
-                try {
-                    apiService.setLedRGBLevel(0, 255, 0, 0);
-                    apiService.setLedRGBLevel(1, 0, 255, 0);
-                } catch (RemoteException ex) {
-                    ex.printStackTrace();
-                }
-                ++ledPhase;
-                ledPhase = (ledPhase + 1) % 3;
-                break;
-            case 1:
-                try {
-                    apiService.setLedRGBLevel(0, 0, 255, 0);
-                    apiService.setLedRGBLevel(1, 0, 0, 255);
-                } catch (RemoteException ex) {
-                    ex.printStackTrace();
-                }
-                ++ledPhase;
-                ledPhase = (ledPhase + 1) % 3;
-                break;
-            case 2:
-                try {
-                    apiService.setLedRGBLevel(0, 0, 0, 255);
-                    apiService.setLedRGBLevel(1, 255, 0, 0);
-                } catch (RemoteException ex) {
-                    ex.printStackTrace();
-                }
-                ++ledPhase;
-                ledPhase = (ledPhase + 1) % 3;
-                break;
-            default:
-                ledPhase = 0;
-                break;
+            textViewStatus.setText("starting nautobahn");
+        } else {
+            textViewStatus.setText("no autostart nautobahn");
         }
     }
 
@@ -113,15 +81,31 @@ public class MainActivity extends Activity {
 
         context = getApplicationContext();
 
-        mainActivity = this;
+        final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
 
-        Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-        MediaPlayer mp = MediaPlayer.create(context, notification);
-        mp.start();
+        textViewStatus = (TextView) findViewById(R.id.status);
 
-        Intent intent = new Intent("com.nauto.apis.NautoAPIManager.BIND_SERVICE")
-            .setClassName("com.nauto.apis", "com.nauto.apis.NautoAPIManager");
-        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+//        mainActivity = this;
+
+        if (rocketLauncher.getOnBootIntentsReceived() > 0) {
+            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+            MediaPlayer mp = MediaPlayer.create(context, notification);
+            mp.start();
+            automaticBoot = true;
+        } else {
+            File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            String filePath = String.format("%s/may-i-have-your-attention.mp3", dirPath);
+            mediaPlayer.reset();
+            try {
+                mediaPlayer.setDataSource(filePath);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            automaticBoot = false;
+        }
 
         buttonLed = (Button) findViewById(R.id.led);
         buttonLed.setTag(1);
@@ -130,28 +114,16 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 int action = (int) buttonLed.getTag();
                 if (action == 1) {
-                    try {
-                        apiService.setLedRGBLevel(0, 255, 0, 0);
-                        apiService.setLedRGBLevel(1, 255, 0, 0);
-                    } catch (RemoteException ex) {
-                        ex.printStackTrace();
-                    }
+                    rocketLauncher.setLed(0, 255, 0, 0);
+                    rocketLauncher.setLed(1, 255, 0, 0);
                     buttonLed.setTag(2);
                 } else if (action == 2) {
-                    try {
-                        apiService.setLedRGBLevel(0, 0, 255, 0);
-                        apiService.setLedRGBLevel(1, 0, 255, 0);
-                    } catch (RemoteException ex) {
-                        ex.printStackTrace();
-                    }
+                    rocketLauncher.setLed(0, 0, 255, 0);
+                    rocketLauncher.setLed(1, 0, 255, 0);
                     buttonLed.setTag(3);
                 } else if (action == 3) {
-                    try {
-                        apiService.setLedRGBLevel(0, 0, 0, 255);
-                        apiService.setLedRGBLevel(1, 0, 0, 255);
-                    } catch (RemoteException ex) {
-                        ex.printStackTrace();
-                    }
+                    rocketLauncher.setLed(0, 0, 0, 255);
+                    rocketLauncher.setLed(1, 0, 0, 255);
                     buttonLed.setTag(1);
                 }
             }
@@ -218,35 +190,12 @@ public class MainActivity extends Activity {
     }
 
     private void startFan() {
-        try {
-            apiService.setFanRPM(200);
-        } catch (RemoteException exc) {
-            Log.e(TAG, "Caught exception when registering API service", exc);
-        }
+        RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+        rocketLauncher.setFan(200);
     }
 
     private void stopFan() {
-        try {
-            apiService.setFanRPM(0);
-        } catch (RemoteException exc) {
-            Log.e(TAG, "Caught exception when registering API service", exc);
-        }
+        RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+        rocketLauncher.setFan(0);
     }
-
-    private final ServiceConnection serviceConnection = new ServiceConnection() {
-        public void onServiceConnected(ComponentName className, IBinder service) {
-            apiService = INautoAPIManager.Stub.asInterface(service);
-            try {
-                apiService.setFanRPM(200);
-                apiService.setLedRGBLevel(0, 0, 255, 0);
-                apiService.setLedRGBLevel(1, 0, 0, 255);
-            } catch (RemoteException exc) {
-                Log.e(TAG, "Caught exception when registering API service", exc);
-            }
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            apiService = null;
-        }
-    };
 }

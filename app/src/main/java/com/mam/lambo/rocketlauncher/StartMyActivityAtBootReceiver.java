@@ -18,19 +18,20 @@ public class StartMyActivityAtBootReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
 
         MediaPlayer mediaPlayer = new MediaPlayer();
-        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_NOTIFICATIONS);
-        String filePath = String.format("%s/beep-07.wav", dirPath);
-        mediaPlayer.reset();
-        try {
-            mediaPlayer.setDataSource(filePath);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
         if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
+            String filePath = String.format("%s/no-trespassing.mp3", dirPath);
+            mediaPlayer.reset();
+            try {
+                mediaPlayer.setDataSource(filePath);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+            rocketLauncher.incrementOnBootIntentsReceived();
             Intent myStarterIntent = new Intent(context, MainActivity.class);
             myStarterIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(myStarterIntent);
