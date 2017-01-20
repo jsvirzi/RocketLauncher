@@ -84,6 +84,27 @@ public class MainActivity extends Activity {
         }
     }
 
+    String[] sounds = new String[] {
+        "may-i-have-your-attention.mp3",
+        "no-trespassing.mp3",
+        "beep.mp3",
+        "tiny-bell.mp3",
+    };
+
+    public void playSound(int index) {
+        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        MediaPlayer mediaPlayer = new MediaPlayer();
+        String filePath = String.format("%s/%s", dirPath, sounds[index]);
+        mediaPlayer.reset();
+        try {
+            mediaPlayer.setDataSource(filePath);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -98,22 +119,13 @@ public class MainActivity extends Activity {
 //        mainActivity = this;
 
         if (rocketLauncher.getOnBootIntentsReceived() == 0) {
-            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-            MediaPlayer mp = MediaPlayer.create(context, notification);
-            mp.start();
+            playSound(0);
+//            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+//            MediaPlayer mp = MediaPlayer.create(context, notification);
+//            mp.start();
             automaticBoot = false;
         } else {
-            File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            MediaPlayer mediaPlayer = new MediaPlayer();
-            String filePath = String.format("%s/may-i-have-your-attention.mp3", dirPath);
-            mediaPlayer.reset();
-            try {
-                mediaPlayer.setDataSource(filePath);
-                mediaPlayer.prepare();
-                mediaPlayer.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            playSound(1);
             automaticBoot = true;
         }
 
