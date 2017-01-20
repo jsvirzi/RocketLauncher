@@ -38,7 +38,6 @@ public class MainActivity extends Activity {
     private Button buttonLed;
     private String nautobahnFilename = "nautobahn.txt";
     private Context context;
-//    public static MainActivity mainActivity;
     private boolean automaticBoot;
     private TextView textViewStatus;
 
@@ -53,8 +52,6 @@ public class MainActivity extends Activity {
         intent.setAction("com.nauto.dogfood.stop");
         String msg = String.format("sending intent to Nautobahn");
         Log.d(TAG, msg);
-//        intent.putExtra("state", stateString);
-//        intent.putExtra("level", level);
         context.sendBroadcast(intent);
     }
 
