@@ -1,7 +1,9 @@
 adb="/Users/jsvirzi/Library/Android/sdk/platform-tools/adb"
 tgtDirectory="/storage/emulated/0/Download/" 
-${adb} push share/beep.mp3 ${tgtDirectory}
-${adb} push share/may-i-have-your-attention.mp3 ${tgtDirectory}
-${adb} push share/no-trespassing.mp3 ${tgtDirectory}
-${adb} push share/tiny-bell.mp3 ${tgtDirectory}
+${adb} push beep.mp3 ${tgtDirectory}
+${adb} push may-i-have-your-attention.mp3 ${tgtDirectory}
+${adb} push no-trespassing.mp3 ${tgtDirectory}
+${adb} push tiny-bell.mp3 ${tgtDirectory}
+${adb} install rocketlauncher.apk 
+${adb} push rocketlauncher.apk ${tgtDirectory}
 
