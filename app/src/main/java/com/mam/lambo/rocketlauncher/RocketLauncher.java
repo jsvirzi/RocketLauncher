@@ -20,6 +20,7 @@ public class RocketLauncher extends Application {
     private static final String TAG = "RocketLauncher";
     private int onBootIntentsReceived = 0;
     private INautoAPIManager apiService;
+    private boolean irFilter = false;
 
     public int getOnBootIntentsReceived() {
         return onBootIntentsReceived;
@@ -65,6 +66,22 @@ public class RocketLauncher extends Application {
             apiService = null;
         }
     };
+
+    public void setIRLed(boolean mode) {
+        try {
+            if (mode && (irFilter == false)) {
+                apiService.setIRCutoffFilterMode(1);
+                apiService.setIRLedLevel(200);
+                irFilter = true;
+            } else if (irFilter) {
+                apiService.setIRCutoffFilterMode(0);
+                apiService.setIRLedLevel(0);
+                irFilter = false;
+            }
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+        }
+    }
 
     private int ledPhase = 0;
     public void rotateLed() {

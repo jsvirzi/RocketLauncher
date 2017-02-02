@@ -79,6 +79,14 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
                     }
                 }
             }
+        } else if (intent.getAction() == "com.nautobahn.itstoodark") {
+            final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+            rocketLauncher.setIRLed(true);
+            rocketLauncher.setLed(0, 255, 0, 0);
+        } else if (intent.getAction() == "com.nautobahn.itslight") {
+            final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+            rocketLauncher.setIRLed(false);
+            rocketLauncher.setLed(0, 0, 0, 255);
         }
     }
 }
