@@ -73,7 +73,7 @@ public class RocketLauncher extends Application {
                 apiService.setIRCutoffFilterMode(1);
                 apiService.setIRLedLevel(200);
                 irFilter = true;
-            } else if (irFilter) {
+            } else if ((mode == false) && irFilter) {
                 apiService.setIRCutoffFilterMode(0);
                 apiService.setIRLedLevel(0);
                 irFilter = false;

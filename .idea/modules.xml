@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/RocketLauncher.iml" filepath="$PROJECT_DIR$/RocketLauncher.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file:///media/ssdb/projects/RocketLauncher/RocketLauncher.iml" filepath="/media/ssdb/projects/RocketLauncher/RocketLauncher.iml" />
+      <module fileurl="file:///media/ssdb/projects/RocketLauncher/app/app.iml" filepath="/media/ssdb/projects/RocketLauncher/app/app.iml" />
     </modules>
   </component>
 </project>
