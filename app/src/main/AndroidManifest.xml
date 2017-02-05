@@ -51,6 +51,10 @@
                 <action android:name="com.nautobahn.itslight" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.nautobahn.fanspeed" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </receiver>
 
         <activity android:name=".MainActivity">

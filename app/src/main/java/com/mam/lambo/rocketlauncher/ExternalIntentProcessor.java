@@ -87,6 +87,11 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
             final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
             rocketLauncher.setIRLed(false);
             rocketLauncher.setLed(0, 0, 0, 255);
+        } else if (intent.getAction() == "com.nautobahn.fanspeed") {
+            int fanSpeed = intent.getIntExtra("speed", 0);
+            final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+            rocketLauncher.setFan(fanSpeed);
+            rocketLauncher.setLed(0, fanSpeed, fanSpeed, fanSpeed);
         }
     }
 }
