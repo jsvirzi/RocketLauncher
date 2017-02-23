@@ -54,7 +54,7 @@ public class RocketLauncher extends Application {
         public void onServiceConnected(ComponentName className, IBinder service) {
             apiService = INautoAPIManager.Stub.asInterface(service);
             try {
-                apiService.setFanRPM(0);
+                apiService.setFanRPM(200);
                 apiService.setLedRGBLevel(0, 0, 255, 0);
                 apiService.setLedRGBLevel(1, 0, 0, 255);
             } catch (RemoteException exc) {
