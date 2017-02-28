@@ -16,6 +16,13 @@
         android:layout_height="400sp"
         android:orientation="vertical">
 
+        <Button
+            android:layout_width="200sp"
+            android:layout_height="40sp"
+            android:text="fan speed"
+            android:id="@+id/fanSpeed"
+            />
+
         <CheckBox
             android:layout_width="200sp"
             android:layout_height="40sp"

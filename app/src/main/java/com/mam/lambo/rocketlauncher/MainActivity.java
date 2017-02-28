@@ -40,6 +40,8 @@ public class MainActivity extends Activity {
     private Context context;
     private boolean automaticBoot;
     private TextView textViewStatus;
+    private int fanSpeed = 255;
+    private Button buttonFanSpeed;
 
     public void startNautobahn() {
         Intent intent = new Intent();
@@ -125,6 +127,17 @@ public class MainActivity extends Activity {
             playSound(1);
             automaticBoot = true;
         }
+
+        buttonFanSpeed = (Button) findViewById(R.id.fanSpeed);
+        buttonFanSpeed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rocketLauncher.setFan(fanSpeed);
+                String msg = String.format("current fan speed = %d", fanSpeed);
+                textViewStatus.setText(msg);
+                fanSpeed -= 32;
+            }
+        });
 
         buttonLed = (Button) findViewById(R.id.led);
         buttonLed.setTag(1);
