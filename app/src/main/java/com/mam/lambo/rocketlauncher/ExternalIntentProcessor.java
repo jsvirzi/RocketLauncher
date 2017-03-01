@@ -36,7 +36,7 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
             }
         } else if (intent.getAction() == "com.nautobahn.fanspeed") {
             Log.d(TAG, "received intent: com.nautobahn.fanspeed");
-            final int fanSpeed = intent.getIntExtra("level", -1);
+            final int fanSpeed = intent.getIntExtra("speed", -1);
             final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
             if (rocketLauncher != null) {
                 Runnable runnable = new Runnable() {
