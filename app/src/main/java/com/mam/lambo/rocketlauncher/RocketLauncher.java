@@ -86,11 +86,12 @@ public class RocketLauncher extends Application {
 
     private int ledPhase = 0;
     public void rotateLed() {
+        int maxLed = 25;
         switch (ledPhase) {
             case 0:
                 try {
-                    apiService.setLedRGBLevel(0, 255, 0, 0);
-                    apiService.setLedRGBLevel(1, 0, 255, 0);
+                    apiService.setLedRGBLevel(0, maxLed, 0, 0);
+                    apiService.setLedRGBLevel(1, 0, maxLed, 0);
                 } catch (RemoteException ex) {
                     ex.printStackTrace();
                 }
@@ -99,8 +100,8 @@ public class RocketLauncher extends Application {
                 break;
             case 1:
                 try {
-                    apiService.setLedRGBLevel(0, 0, 255, 0);
-                    apiService.setLedRGBLevel(1, 0, 0, 255);
+                    apiService.setLedRGBLevel(0, 0, maxLed, 0);
+                    apiService.setLedRGBLevel(1, 0, 0, maxLed);
                 } catch (RemoteException ex) {
                     ex.printStackTrace();
                 }
@@ -109,8 +110,8 @@ public class RocketLauncher extends Application {
                 break;
             case 2:
                 try {
-                    apiService.setLedRGBLevel(0, 0, 0, 255);
-                    apiService.setLedRGBLevel(1, 255, 0, 0);
+                    apiService.setLedRGBLevel(0, 0, 0, maxLed);
+                    apiService.setLedRGBLevel(1, maxLed, 0, 0);
                 } catch (RemoteException ex) {
                     ex.printStackTrace();
                 }
