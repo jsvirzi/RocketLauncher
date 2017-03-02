@@ -144,18 +144,19 @@ public class MainActivity extends Activity {
         buttonLed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                int maxLed = 25;
                 int action = (int) buttonLed.getTag();
                 if (action == 1) {
-                    rocketLauncher.setLed(0, 255, 0, 0);
-                    rocketLauncher.setLed(1, 255, 0, 0);
+                    rocketLauncher.setLed(0, maxLed, 0, 0);
+                    rocketLauncher.setLed(1, maxLed, 0, 0);
                     buttonLed.setTag(2);
                 } else if (action == 2) {
-                    rocketLauncher.setLed(0, 0, 255, 0);
-                    rocketLauncher.setLed(1, 0, 255, 0);
+                    rocketLauncher.setLed(0, 0, maxLed, 0);
+                    rocketLauncher.setLed(1, 0, maxLed, 0);
                     buttonLed.setTag(3);
                 } else if (action == 3) {
-                    rocketLauncher.setLed(0, 0, 0, 255);
-                    rocketLauncher.setLed(1, 0, 0, 255);
+                    rocketLauncher.setLed(0, 0, 0, maxLed);
+                    rocketLauncher.setLed(1, 0, 0, maxLed);
                     buttonLed.setTag(1);
                 }
             }
