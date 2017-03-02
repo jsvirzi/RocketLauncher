@@ -54,7 +54,6 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
             if (rocketLauncher != null) {
                 final int led = level;
                 if ((led == 0) || (led == 1)) {
-                    rocketLauncher.setLed(led, 250, 0, 0);
                     Runnable runnable = new Runnable() {
                         @Override
                         public void run() {
@@ -95,11 +94,13 @@ public class ExternalIntentProcessor extends BroadcastReceiver {
         } else if (intent.getAction() == "com.nautobahn.itstoodark") {
             final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
             rocketLauncher.setIRLed(true);
-            rocketLauncher.setLed(0, 255, 0, 0);
+            int maxLed = 25;
+            rocketLauncher.setLed(0, maxLed, 0, 0);
         } else if (intent.getAction() == "com.nautobahn.itslight") {
             final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
             rocketLauncher.setIRLed(false);
-            rocketLauncher.setLed(0, 0, 0, 255);
+            int maxLed = 25;
+            rocketLauncher.setLed(0, 0, 0, maxLed);
         }
     }
 }
