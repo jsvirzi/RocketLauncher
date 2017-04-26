@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2016 Qisda.corp
+ *
+ * Version: 0.9.5
+ */
 package com.nauto.apis;
 
 import com.nauto.apis.NautoAPIManagerData;
@@ -24,34 +29,34 @@ interface INautoAPIManager {
     
     /**
      * Set led RGB level.
-     * @param index which RGB led.
-     * @param levelR red led value, 0 ~ 255.
-     * @param levelG grenn led value, 0 ~ 255.
-     * @param levelB blue RGB value, 0 ~ 255.
+     * @param index  0 means left RGB led, 1 means right RGB led.
+     * @param levelR param range: 0 ~ 25 , 0->Turn off,25->25mA;
+     * @param levelG param range: 0 ~ 25 , 0->Turn off,25->25mA;
+     * @param levelB param range: 0 ~ 25 , 0->Turn off,25->25mA;
      */
     void setLedRGBLevel(int index, int levelR, int levelG, int levelB);
 
     /**
      * Set IR led level.
-     * @param level IR led value, 0 ~ 200, 0 means off.
+     * @param level IR led value, param range:0 ~ 200, 0->Turn off;200->200mA for 1 Led,and total is 400mA for 2 IR leds
      */
     void setIRLedLevel(int level);
     
     /**
      * Set IR cutoff mode.
-     * @param mode {@code 0} normal mode, {@code 1} night mode.
+     * @param mode {@code 0} night mode, {@code 1} normal mode.
      */
     void setIRCutoffFilterMode(int mode);
     
     /**
      * Get current fan speed (rpm: round per minute).
-     * @return The fan speed.
+     * @return The fan speed, such as 13653
      */
     int getFanRPM();
     
     /**
      * Set fan speed.
-     * @param rpm round per minute. 
+     * @param rpm rpm level, param range:0~255, 0->Turn off;255->13000RPM(Max 20% inaccuracy)
      */
     void setFanRPM(int rpm);
 
@@ -62,57 +67,16 @@ interface INautoAPIManager {
     float getAmbientTemperature();
 
     /**
-     * Start the coulomb counter.
+     * Switch from otg mode to client mode, need reboot the device
+     * @param mode {@code 1} otg mode, {@code 0} client mode.
      */
-    void startCoulombCounter();
-
-    /**
-     * Reset the coulomb counter.
-     */
-    void resetCoulombCounter();
-
-    /**
-     * Get coulomb count form coulomb counter
-     * @return The coulomb count.
-     */
-    int getCoulombCount();
-
-    /**
-     * Set WOM threshold.
-     * The register holds the threshold value of Wake on Motion interrupt for accelerometer.
-     * @param threshold Threshold value, 0 ~ 255.
-     */
-    void setWOMThreshold(int threshold);
-
-    /**
-     * Set WOA threshold.
-     * @param threshold Threshold value, 0 ~ 255.
-     */
-    void setWOAThreshold(int threshold);
-
-    /**
-     * Get vehicle battery voltage from DC2DC convertor
-     * @return The vehicle battery voltage.
-     */
-    float getVehicleBatteryVoltage();
-    
-    /**
-     * Get backup battery voltage
-     * @return The backup battery voltage.
-     */
-    float getBackupBatteryVoltage();
-    
-    /**
-     * Switch from otg mode to clint mode, need reboot the device
-     * @param mode {@code 0} otg mode, {@code 1} client mode.
-     */
-    void swtichUsbMode(int mode);
+    void switchUsbMode(int mode);
     
     /**
      * Get SD card serial number
      * @return The SD card serial number.
      */
-    int getSDSerialNumber();
+    String getSDSerialNumber();
     
     /**
      * The Health Status Register allows access to supplementary information about the SanDisk Industrial microSD card. 
@@ -185,17 +149,78 @@ interface INautoAPIManager {
     float getCpuTemperature();
     
     /**
-     * Get IMU register value
-     * @return The IMU register value.
+     * Get CPU core temperature
+     * @return The CPU core temperature using Celsius.
      */
-    int getIMURegisterValue(int address);
+    float[] getCpuCoreTemperature();
     
     /**
-     * Get IRQ register status
-     * @return The IRQ register status.
+     * Get IMU register value
+     * @param address IMU register address.
+     * @return The IMU register value.
      */
-    int getIRQRegisterStatus(int address);
+    byte[] getIMURegisterValue(int address);
     
+    /**
+     * 1st g-sensor is used for wake up system on motion event:
+     * 1st g-sensor default sensitivity:  -16g ~ +16g
+     * 1st g-sensor threshold_value = threshold * 0.004g (0 ~ 1.02g)
+     *
+     * @param threshold 0 ~ 255.
+     */
+    void set1stGSensorWOMThreshold(byte threshold);
+    
+    /**
+     * It will get WOM threshold of 1st G-Sensor.
+     *
+     * @return The wom threshold value.
+     */
+    byte get1stGSensorWOMThreshold();
+    
+    /**
+     * 2nd g-sensor is used for report sensor data to nauto2 
+     * when detecting motion exceeds threshold setting.
+     * 2nd g-sensor default sensitivity: -4g ~ +4g
+     * 2nd g-sensor threshold_value = threshold * 0.031g ( 0 ~ 7.97g)
+     *
+     * @param threshold param range 0 ~ 255, -1 -> Disable 2nd g-sensor.
+     */
+    void set2ndGSensorMotionThreshold(byte threshold);
+    
+    /**
+     * It will get motion threshold of 2nd G-Sensor.
+     *
+     * @return The motion threshold value.
+     */
+    byte get2ndGSensorMotionThreshold();
+   
+    /**
+     * 1st g-sensor is used for wake up system on motion event:
+     * 1st g-sensor default sensitivity:  -16g ~ +16g
+     * 2nd g-sensor is used for report sensor data to nauto2
+     * when detecting motion exceeds threshold setting
+     * 2nd g-sensor default sensitivity:  -4g ~ +4g
+     * need reboot the device after setting.
+     *
+     * @param index 1st g-sensor (0), 2nd g-sensor (1)
+     * @param sensitivity 2g (0), 4g (1), 8g (2), 16g (3)
+     */
+    void setGSensorSensitivity (int index, int sensitivity);
+
+    /**
+     * Get G-sensor sensityvity
+     *
+     * @param index 1st g-sensor (0), 2nd g-sensor (1)
+     * @return sensitivity value of g-sensor
+     */
+     int getGSensorSensitivity (int index);
+ 
+    /**
+     * Set WOA threshold.
+     * @param threshold Threshold value,TBD.
+     */
+    void setWOAThreshold(int threshold);
+
     /**
      * Do factory reset: enter recovery mode and clear all user data.
      */
@@ -213,8 +238,8 @@ interface INautoAPIManager {
     
     /**
      * Turn on or off radio power.
-     * @param power {@code true} to turn on, {@code false} to turn off.
+     * @param on {@code true} to turn on, {@code false} to turn off.
      */
-    void setRadioPower(boolean power);
+    void setRadioPower(boolean on);
 }
 

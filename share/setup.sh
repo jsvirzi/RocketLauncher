@@ -4,6 +4,6 @@ ${adb} push beep.mp3 ${tgtDirectory}
 ${adb} push may-i-have-your-attention.mp3 ${tgtDirectory}
 ${adb} push no-trespassing.mp3 ${tgtDirectory}
 ${adb} push tiny-bell.mp3 ${tgtDirectory}
-${adb} install rocketlauncher.apk 
-${adb} push rocketlauncher.apk ${tgtDirectory}
+${adb} install rocketlauncherSofia.apk 
+# ${adb} push rocketlauncher.apk ${tgtDirectory}
 
