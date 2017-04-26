@@ -32,6 +32,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private static final String TAG = "RocketLauncher";
     private CheckBox checkBoxAutoLaunchNautobahn;
     private CheckBox checkBoxNightModeNautobahn;
+    private CheckBox checkBoxHdModeNautobahn;
     private Button buttonExit;
     private Button buttonStartNautobahn;
     private Button buttonStopNautobahn;
@@ -54,6 +55,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         "sound3.mp3",
     };
 
+    class NautobahnConfigurationParameters {
+        int resolutionMode; /* 0 = 1280x720, 1 = 1920x1080 */
+        int nightMode; /* 0 = normal mode, 1 = night mode */
+
+        NautobahnConfigurationParameters() {
+            resolutionMode = 0;
+            nightMode = 0;
+        }
+    };
+
+    NautobahnConfigurationParameters nautobahnConfigurationParameters = new NautobahnConfigurationParameters();
+
     /* these need to be in lock-step with *sounds* */
     private int[] soundIndex = new int[] {
         R.raw.sound0,
@@ -74,8 +87,15 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             String msg = String.format("error reading file [%s]", nautobahnFile.getName());
             Log.e(TAG, msg, ex);
         }
-        intent.putExtra("mode", line);
+        intent.putExtra("resolution", nautobahnConfigurationParameters.resolutionMode);
+        intent.putExtra("night", nautobahnConfigurationParameters.nightMode);
         startActivity(intent);
+    }
+
+    private void writeNautobahnConfigurationFile(NautobahnConfigurationParameters nautobahnConfigurationParameters) {
+    }
+
+    NautobahnConfigurationParameters readNautobahnConfigurationFile(File file) {
     }
 
     public void stopNautobahn() {
@@ -210,6 +230,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         });
 
         checkBoxNightModeNautobahn = (CheckBox) findViewById(R.id.nightModeNautobahn);
+
+        checkBoxHdModeNautobahn = (CheckBox) findViewById(R.id.hdModeNautobahn);
 
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
         checkBoxAutoLaunchNautobahn.setChecked(autoLaunchingNautobahn());

@@ -40,15 +40,15 @@
         <CheckBox
             android:layout_width="200sp"
             android:layout_height="40sp"
-            android:text="auto launch fan"
-            android:id="@+id/autoLaunchFan"
+            android:text="nautobahn 1920x1080"
+            android:id="@+id/hdModeNautobahn"
             />
 
-        <Button
+        <CheckBox
             android:layout_width="200sp"
             android:layout_height="40sp"
-            android:text="stop nautobahn"
-            android:id="@+id/stopNautobahn"
+            android:text="auto launch fan"
+            android:id="@+id/autoLaunchFan"
             />
 
         <Button
@@ -61,8 +61,8 @@
         <Button
             android:layout_width="200sp"
             android:layout_height="40sp"
-            android:text="stop fan"
-            android:id="@+id/stopFan"
+            android:text="stop nautobahn"
+            android:id="@+id/stopNautobahn"
             />
 
         <Button
@@ -70,6 +70,13 @@
             android:layout_height="40sp"
             android:text="start fan"
             android:id="@+id/startFan"
+            />
+
+        <Button
+            android:layout_width="200sp"
+            android:layout_height="40sp"
+            android:text="stop fan"
+            android:id="@+id/stopFan"
             />
 
         <Button
