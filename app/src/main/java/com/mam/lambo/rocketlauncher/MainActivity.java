@@ -27,7 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener {
 
     private static final String TAG = "RocketLauncher";
     private CheckBox checkBoxAutoLaunchNautobahn;
@@ -38,13 +38,13 @@ public class MainActivity extends Activity {
     private Button buttonStartFan;
     private Button buttonStopFan;
     private Button buttonLed;
-    private String nautobahnFilename;
     private File nautobahnFile;
     private Context context;
     private boolean automaticBoot;
     private TextView textViewStatus;
     private int fanSpeed = 255;
     private Button buttonFanSpeed;
+    MediaPlayer mediaPlayer;
 
     /* these need to be in lock-step with *soundIndex* */
     private final String[] sounds = new String[] {
@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
             String msg = String.format("error reading file [%s]", nautobahnFile.getName());
             Log.e(TAG, msg, ex);
         }
-        intent.putExtra("modeString", line);
+        intent.putExtra("mode", line);
         startActivity(intent);
     }
 
@@ -96,13 +96,18 @@ public class MainActivity extends Activity {
         return nautobahnFile.exists();
     }
 
+    public void onCompletion(MediaPlayer mediaPlayer) {
+        mediaPlayer.stop();
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         if (automaticBoot && autoLaunchingNautobahn()) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            MediaPlayer mp = MediaPlayer.create(context, notification);
-            mp.start();
+            mediaPlayer = MediaPlayer.create(context, notification);
+            mediaPlayer.setOnCompletionListener(this);
+            mediaPlayer.start();
             startNautobahn();
             textViewStatus.setText("starting nautobahn");
         } else {
@@ -122,21 +127,16 @@ public class MainActivity extends Activity {
 
         context = getApplicationContext();
 
-        nautobahnFilename = "nautobahn.txt";
+        String filename = "nautobahn.txt";
         File directory = getExternalFilesDir(null);
-        nautobahnFile = new File(directory, nautobahnFilename);
+        nautobahnFile = new File(directory, filename);
 
         final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
 
         textViewStatus = (TextView) findViewById(R.id.status);
 
-//        mainActivity = this;
-
         if (rocketLauncher.getOnBootIntentsReceived() == 0) {
             playSound(0);
-//            Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
-//            MediaPlayer mp = MediaPlayer.create(context, notification);
-//            mp.start();
             automaticBoot = false;
         } else {
             playSound(1);
