@@ -33,6 +33,13 @@
         <CheckBox
             android:layout_width="200sp"
             android:layout_height="40sp"
+            android:text="nautobahn night mode"
+            android:id="@+id/nightModeNautobahn"
+            />
+
+        <CheckBox
+            android:layout_width="200sp"
+            android:layout_height="40sp"
             android:text="auto launch fan"
             android:id="@+id/autoLaunchFan"
             />

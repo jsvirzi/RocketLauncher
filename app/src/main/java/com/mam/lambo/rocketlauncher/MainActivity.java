@@ -22,6 +22,7 @@ import android.widget.TextView;
 import com.nauto.apis.INautoAPIManager;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,22 +31,50 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "RocketLauncher";
     private CheckBox checkBoxAutoLaunchNautobahn;
+    private CheckBox checkBoxNightModeNautobahn;
     private Button buttonExit;
     private Button buttonStartNautobahn;
     private Button buttonStopNautobahn;
     private Button buttonStartFan;
     private Button buttonStopFan;
     private Button buttonLed;
-    private String nautobahnFilename = "nautobahn.txt";
+    private String nautobahnFilename;
+    private File nautobahnFile;
     private Context context;
     private boolean automaticBoot;
     private TextView textViewStatus;
     private int fanSpeed = 255;
     private Button buttonFanSpeed;
 
+    /* these need to be in lock-step with *soundIndex* */
+    private final String[] sounds = new String[] {
+        "sound0.mp3",
+        "sound1.mp3",
+        "sound2.mp3",
+        "sound3.mp3",
+    };
+
+    /* these need to be in lock-step with *sounds* */
+    private int[] soundIndex = new int[] {
+        R.raw.sound0,
+        R.raw.sound1,
+        R.raw.sound2,
+        R.raw.sound3
+    };
+
     public void startNautobahn() {
         Intent intent = new Intent();
         intent.setAction("com.nauto.DogFood.action.launch");
+        byte[] line = new byte[32];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(nautobahnFile);
+            int nBytes = fileInputStream.read(line);
+            fileInputStream.close();
+        } catch (IOException ex) {
+            String msg = String.format("error reading file [%s]", nautobahnFile.getName());
+            Log.e(TAG, msg, ex);
+        }
+        intent.putExtra("modeString", line);
         startActivity(intent);
     }
 
@@ -58,15 +87,13 @@ public class MainActivity extends Activity {
     }
 
     private boolean autoLaunchingNautobahn() {
-        File directory = getExternalFilesDir(null);
-        File file = new File(directory, nautobahnFilename);
         try {
-            String msg = String.format("looking for file [%s]", file.getCanonicalFile().toString());
+            String msg = String.format("looking for file [%s]", nautobahnFile.getCanonicalFile().toString());
             textViewStatus.setText(msg);
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        return file.exists();
+        return nautobahnFile.exists();
     }
 
     @Override
@@ -83,25 +110,9 @@ public class MainActivity extends Activity {
         }
     }
 
-    String[] sounds = new String[] {
-        "may-i-have-your-attention.mp3",
-        "no-trespassing.mp3",
-        "beep.mp3",
-        "tiny-bell.mp3",
-    };
-
     public void playSound(int index) {
-        File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        MediaPlayer mediaPlayer = new MediaPlayer();
-        String filePath = String.format("%s/%s", dirPath, sounds[index]);
-        mediaPlayer.reset();
-        try {
-            mediaPlayer.setDataSource(filePath);
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        MediaPlayer mediaPlayer = MediaPlayer.create(context, soundIndex[index]);
+        mediaPlayer.start();
     }
 
     @Override
@@ -110,6 +121,10 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         context = getApplicationContext();
+
+        nautobahnFilename = "nautobahn.txt";
+        File directory = getExternalFilesDir(null);
+        nautobahnFile = new File(directory, nautobahnFilename);
 
         final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
 
@@ -194,22 +209,27 @@ public class MainActivity extends Activity {
             }
         });
 
+        checkBoxNightModeNautobahn = (CheckBox) findViewById(R.id.nightModeNautobahn);
+
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
         checkBoxAutoLaunchNautobahn.setChecked(autoLaunchingNautobahn());
         checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                File directory = getExternalFilesDir(null);
-                File file = new File(directory, nautobahnFilename);
                 if (checkBoxAutoLaunchNautobahn.isChecked()) {
                     try {
-                        FileOutputStream fileOutputStream = new FileOutputStream(file);
-                    } catch (FileNotFoundException ex) {
-                        String msg = String.format("FileNotFoundException opening file [%s]", file.getName());
+                        FileOutputStream fileOutputStream = new FileOutputStream(nautobahnFile);
+                        boolean nightMode = checkBoxNightModeNautobahn.isChecked();
+                        String line = String.format("mode=%s", nightMode ? "night" : "normal");
+                        fileOutputStream.write(line.getBytes());
+                        fileOutputStream.flush();
+                        fileOutputStream.close();
+                    } catch (IOException ex) {
+                        String msg = String.format("FileNotFoundException accessing file [%s]", nautobahnFile.getName());
                         Log.e(TAG, msg, ex);
                     }
                 } else {
-                    file.delete();
+                    nautobahnFile.delete();
                 }
             }
         });
