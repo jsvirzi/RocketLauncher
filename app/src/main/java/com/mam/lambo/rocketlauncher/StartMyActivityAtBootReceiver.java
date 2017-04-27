@@ -37,17 +37,6 @@ public class StartMyActivityAtBootReceiver extends BroadcastReceiver {
             Runnable startNautobahnRunnable = new Runnable() {
                 @Override
                 public void run() {
-                    MediaPlayer mediaPlayer = new MediaPlayer();
-                    File dirPath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                    String filePath = String.format("%s/no-trespassing.mp3", dirPath);
-                    mediaPlayer.reset();
-                    try {
-                        mediaPlayer.setDataSource(filePath);
-                        mediaPlayer.prepare();
-                        mediaPlayer.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                     for(int i=0;i<15;++i) {
                         rocketLauncher.rotateLed();
                         try {
@@ -64,5 +53,4 @@ public class StartMyActivityAtBootReceiver extends BroadcastReceiver {
             handler.postDelayed(startNautobahnRunnable, 5000);
         }
     }
-
 }

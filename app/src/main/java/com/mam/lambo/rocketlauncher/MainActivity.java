@@ -28,21 +28,24 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     private static final String TAG = "RocketLauncher";
     private CheckBox checkBoxAutoLaunchNautobahn;
+    private CheckBox checkBoxAutoLaunchDistraction;
     private CheckBox checkBoxNightModeNautobahn;
     private CheckBox checkBoxHdModeNautobahn;
     private Button buttonExit;
     private Button buttonStartNautobahn;
-    private Button buttonStopNautobahn;
+    private Button buttonStartDistraction;
     private Button buttonStartFan;
     private Button buttonStopFan;
     private Button buttonLed;
+    private Button buttonIrLed;
     private File nautobahnFile;
     private Context context;
     private boolean automaticBoot;
     private TextView textViewStatus;
     private int fanSpeed = 255;
     private Button buttonFanSpeed;
-    MediaPlayer mediaPlayer;
+    private static final int ActivityDogfood = 0;
+    private static final int ActivityDistraction = 1;
 
     /* these need to be in lock-step with *soundIndex* */
     private final String[] sounds = new String[] {
@@ -56,9 +59,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         int resolution; /* 720 = 1280x720, 1080 = 1920x1080 */
         int nightMode; /* 0 = normal mode, 1 = night mode */
         int autoLaunch; /* 0 = no autolaunch, 1 = autolaunch */
+        int activity; /* 0 = dogfood, 1 = distraction */
         static final String resolutionString = "resolution";
         static final String nightModeString = "night";
         static final String autoLaunchString = "autolaunch";
+        static final String activityString = "activity";
 
         NautobahnConfigurationParameters() {
             resolution = 0;
@@ -76,13 +81,32 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         R.raw.sound3
     };
 
+    public void startNautobahnDistraction() {
+        Intent intent = new Intent();
+        intent.setAction("com.nauto.Distraction.action.launch");
+        writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
+        intent.putExtra(nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
+        intent.putExtra(nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
+        intent.putExtra(nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
+        intent.putExtra(nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
+        startActivity(intent);
+    }
+
     public void startNautobahn() {
         Intent intent = new Intent();
         intent.setAction("com.nauto.DogFood.action.launch");
         writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
         intent.putExtra(nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
         intent.putExtra(nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
+        intent.putExtra(nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
+        intent.putExtra(nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
         startActivity(intent);
+//        RocketLauncher rocketLauncher = RocketLauncher.getInstance();
+//        if (nautobahnConfigurationParameters.nightMode == 0) {
+//            rocketLauncher.setIRLed(false);
+//        } else {
+//            rocketLauncher.setIRLed(true);
+//        }
     }
 
     public void stopNautobahn() {
@@ -100,6 +124,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         line = String.format("%s,%d\n", nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
         Utils.writeLine(writer, line);
         line = String.format("%s,%d\n", nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
+        Utils.writeLine(writer, line);
+        line = String.format("%s,%d\n", nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
         Utils.writeLine(writer, line);
         Utils.closeStream(writer);
     }
@@ -120,6 +146,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     parameters.resolution = Utils.atoi(strings[1], 0);
                 } else if (strings[0].equals(parameters.autoLaunchString)) {
                     parameters.autoLaunch = Utils.atoi(strings[1], 0);
+                } else if (strings[0].equals(parameters.activityString)) {
+                    parameters.activity = Utils.atoi(strings[1], 0);
                 }
             }
         } catch (FileNotFoundException ex) {
@@ -142,7 +170,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         super.onStart();
         if (automaticBoot && autoLaunchingNautobahn()) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            mediaPlayer = MediaPlayer.create(context, notification);
+            MediaPlayer mediaPlayer = MediaPlayer.create(context, notification);
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.start();
             startNautobahn();
@@ -217,6 +245,23 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         });
 
+        buttonIrLed = (Button) findViewById(R.id.irLed);
+        buttonIrLed.setTag(1);
+        buttonIrLed.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                int maxLed = 200;
+                int action = (int) buttonIrLed.getTag();
+                if (action == 1) {
+                    rocketLauncher.setIRLed(true);
+                    buttonIrLed.setTag(0);
+                } else {
+                    rocketLauncher.setIRLed(false);
+                    buttonIrLed.setTag(1);
+                }
+            }
+        });
+
         buttonStartNautobahn = (Button) findViewById(R.id.startNautobahn);
         buttonStartNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -225,11 +270,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         });
 
-        buttonStopNautobahn = (Button) findViewById(R.id.stopNautobahn);
-        buttonStopNautobahn.setOnClickListener(new View.OnClickListener() {
+        buttonStartDistraction = (Button) findViewById(R.id.startDistraction);
+        buttonStartDistraction.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stopNautobahn();
+                startNautobahnDistraction();
             }
         });
 
@@ -268,11 +313,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         });
 
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
-        checkBoxAutoLaunchNautobahn.setChecked(nautobahnConfigurationParameters.autoLaunch == 1);
+        checkBoxAutoLaunchNautobahn.setChecked((nautobahnConfigurationParameters.activity == ActivityDogfood) && (nautobahnConfigurationParameters.autoLaunch == 1));
         checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                nautobahnConfigurationParameters.activity = ActivityDogfood;
                 nautobahnConfigurationParameters.autoLaunch = checkBoxAutoLaunchNautobahn.isChecked() ? 1 : 0;
+            }
+        });
+
+        checkBoxAutoLaunchDistraction = (CheckBox) findViewById(R.id.autoLaunchDistraction);
+        checkBoxAutoLaunchDistraction.setChecked((nautobahnConfigurationParameters.activity == ActivityDistraction) && (nautobahnConfigurationParameters.autoLaunch == 1));
+        checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nautobahnConfigurationParameters.activity = ActivityDistraction;
+                nautobahnConfigurationParameters.autoLaunch = checkBoxAutoLaunchDistraction.isChecked() ? 1 : 0;
             }
         });
 
