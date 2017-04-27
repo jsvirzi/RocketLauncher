@@ -1,31 +1,28 @@
 package com.mam.lambo.rocketlauncher;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
-import com.nauto.apis.INautoAPIManager;
+import com.mam.lambo.utils.CsvFile;
+import com.mam.lambo.utils.Utils;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener {
 
@@ -56,16 +53,20 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     };
 
     class NautobahnConfigurationParameters {
-        int resolutionMode; /* 0 = 1280x720, 1 = 1920x1080 */
+        int resolution; /* 720 = 1280x720, 1080 = 1920x1080 */
         int nightMode; /* 0 = normal mode, 1 = night mode */
+        int autoLaunch; /* 0 = no autolaunch, 1 = autolaunch */
+        static final String resolutionString = "resolution";
+        static final String nightModeString = "night";
+        static final String autoLaunchString = "autolaunch";
 
         NautobahnConfigurationParameters() {
-            resolutionMode = 0;
+            resolution = 0;
             nightMode = 0;
         }
     };
 
-    NautobahnConfigurationParameters nautobahnConfigurationParameters = new NautobahnConfigurationParameters();
+    NautobahnConfigurationParameters nautobahnConfigurationParameters;
 
     /* these need to be in lock-step with *sounds* */
     private int[] soundIndex = new int[] {
@@ -78,24 +79,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     public void startNautobahn() {
         Intent intent = new Intent();
         intent.setAction("com.nauto.DogFood.action.launch");
-        byte[] line = new byte[32];
-        try {
-            FileInputStream fileInputStream = new FileInputStream(nautobahnFile);
-            int nBytes = fileInputStream.read(line);
-            fileInputStream.close();
-        } catch (IOException ex) {
-            String msg = String.format("error reading file [%s]", nautobahnFile.getName());
-            Log.e(TAG, msg, ex);
-        }
-        intent.putExtra("resolution", nautobahnConfigurationParameters.resolutionMode);
-        intent.putExtra("night", nautobahnConfigurationParameters.nightMode);
+        writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
+        intent.putExtra(nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
+        intent.putExtra(nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
         startActivity(intent);
-    }
-
-    private void writeNautobahnConfigurationFile(NautobahnConfigurationParameters nautobahnConfigurationParameters) {
-    }
-
-    NautobahnConfigurationParameters readNautobahnConfigurationFile(File file) {
     }
 
     public void stopNautobahn() {
@@ -106,18 +93,48 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         context.sendBroadcast(intent);
     }
 
-    private boolean autoLaunchingNautobahn() {
+    private void writeNautobahnConfigurationFile(File file, NautobahnConfigurationParameters nautobahnConfigurationParameters) {
+        BufferedWriter writer = Utils.getBufferedWriter(file, 1024, false);
+        String line = String.format("%s,%d\n", nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
+        Utils.writeLine(writer, line);
+        line = String.format("%s,%d\n", nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
+        Utils.writeLine(writer, line);
+        line = String.format("%s,%d\n", nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
+        Utils.writeLine(writer, line);
+        Utils.closeStream(writer);
+    }
+
+    NautobahnConfigurationParameters readNautobahnConfigurationFile(File file) {
+        NautobahnConfigurationParameters parameters = new NautobahnConfigurationParameters();
+        CsvFile csvFile = null;
         try {
-            String msg = String.format("looking for file [%s]", nautobahnFile.getCanonicalFile().toString());
-            textViewStatus.setText(msg);
-        } catch (IOException ex) {
+            csvFile = new CsvFile(file.getPath());
+            List<String[]> results = csvFile.read();
+            for (String[] strings : results) {
+                if(strings.length <= 1) {
+                    continue;
+                }
+                if (strings[0].equals(parameters.nightModeString)) {
+                    parameters.nightMode = Utils.atoi(strings[1], 0);
+                } else if (strings[0].equals(parameters.resolutionString)) {
+                    parameters.resolution = Utils.atoi(strings[1], 0);
+                } else if (strings[0].equals(parameters.autoLaunchString)) {
+                    parameters.autoLaunch = Utils.atoi(strings[1], 0);
+                }
+            }
+        } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
-        return nautobahnFile.exists();
+        return parameters;
+    }
+
+    private boolean autoLaunchingNautobahn() {
+        return (nautobahnConfigurationParameters.autoLaunch == 1);
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {
         mediaPlayer.stop();
+        mediaPlayer.release();
     }
 
     @Override
@@ -150,6 +167,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         String filename = "nautobahn.txt";
         File directory = getExternalFilesDir(null);
         nautobahnFile = new File(directory, filename);
+
+        /* read out any existing configuration parameters */
+        nautobahnConfigurationParameters = readNautobahnConfigurationFile(nautobahnFile);
 
         final RocketLauncher rocketLauncher = RocketLauncher.getInstance();
 
@@ -230,29 +250,29 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         });
 
         checkBoxNightModeNautobahn = (CheckBox) findViewById(R.id.nightModeNautobahn);
+        checkBoxNightModeNautobahn.setChecked(nautobahnConfigurationParameters.nightMode != 0);
+        checkBoxNightModeNautobahn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nautobahnConfigurationParameters.nightMode = checkBoxNightModeNautobahn.isChecked() ? 1 : 0;
+            }
+        });
 
         checkBoxHdModeNautobahn = (CheckBox) findViewById(R.id.hdModeNautobahn);
+        checkBoxHdModeNautobahn.setChecked(nautobahnConfigurationParameters.resolution == 1080);
+        checkBoxHdModeNautobahn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                nautobahnConfigurationParameters.resolution = checkBoxHdModeNautobahn.isChecked() ? 1080 : 720;
+            }
+        });
 
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
-        checkBoxAutoLaunchNautobahn.setChecked(autoLaunchingNautobahn());
+        checkBoxAutoLaunchNautobahn.setChecked(nautobahnConfigurationParameters.autoLaunch == 1);
         checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (checkBoxAutoLaunchNautobahn.isChecked()) {
-                    try {
-                        FileOutputStream fileOutputStream = new FileOutputStream(nautobahnFile);
-                        boolean nightMode = checkBoxNightModeNautobahn.isChecked();
-                        String line = String.format("mode=%s", nightMode ? "night" : "normal");
-                        fileOutputStream.write(line.getBytes());
-                        fileOutputStream.flush();
-                        fileOutputStream.close();
-                    } catch (IOException ex) {
-                        String msg = String.format("FileNotFoundException accessing file [%s]", nautobahnFile.getName());
-                        Log.e(TAG, msg, ex);
-                    }
-                } else {
-                    nautobahnFile.delete();
-                }
+                nautobahnConfigurationParameters.autoLaunch = checkBoxAutoLaunchNautobahn.isChecked() ? 1 : 0;
             }
         });
 
