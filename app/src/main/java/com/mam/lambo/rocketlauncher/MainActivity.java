@@ -18,10 +18,7 @@ import com.mam.lambo.utils.Utils;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.List;
 
 public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener {
@@ -92,7 +89,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         startActivity(intent);
     }
 
-    public void startNautobahn() {
+    public void startNautobahnDogfood() {
         Intent intent = new Intent();
         intent.setAction("com.nauto.DogFood.action.launch");
         writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
@@ -156,8 +153,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         return parameters;
     }
 
-    private boolean autoLaunchingNautobahn() {
-        return (nautobahnConfigurationParameters.autoLaunch == 1);
+    private boolean autoLaunchingNautobahnDogfood() {
+        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityDogfood);
+    }
+
+    private boolean autoLaunchingNautobahnDistraction() {
+        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityDistraction);
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {
@@ -168,13 +169,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     @Override
     protected void onStart() {
         super.onStart();
-        if (automaticBoot && autoLaunchingNautobahn()) {
+        if (automaticBoot) {
             Uri notification = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
             MediaPlayer mediaPlayer = MediaPlayer.create(context, notification);
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.start();
-            startNautobahn();
-            textViewStatus.setText("starting nautobahn");
+            if (autoLaunchingNautobahnDogfood()) {
+                startNautobahnDogfood();
+                textViewStatus.setText("starting nautobahn dogfood");
+            } else if (autoLaunchingNautobahnDistraction()) {
+                startNautobahnDistraction();
+                textViewStatus.setText("starting nautobahn distraction");
+            }
         } else {
             textViewStatus.setText("no autostart nautobahn");
         }
@@ -266,7 +272,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         buttonStartNautobahn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startNautobahn();
+                startNautobahnDogfood();
             }
         });
 
