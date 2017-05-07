@@ -12,100 +12,128 @@
     tools:context="com.mam.lambo.rocketlauncher.MainActivity">
 
     <LinearLayout
-        android:layout_width="250sp"
-        android:layout_height="500sp"
-        android:orientation="vertical">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="fan speed tests"
-            android:id="@+id/fanSpeed"
-            />
+        <LinearLayout
+            android:layout_width="250sp"
+            android:layout_height="500sp"
+            android:orientation="vertical">
 
-        <CheckBox
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="auto launch nautobahn"
-            android:id="@+id/autoLaunchNautobahn"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="fan speed tests"
+                android:id="@+id/fanSpeed"
+                />
 
-        <CheckBox
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="auto launch distraction"
-            android:id="@+id/autoLaunchDistraction"
-            />
+            <CheckBox
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="auto launch nautobahn"
+                android:id="@+id/autoLaunchNautobahn"
+                />
 
-        <CheckBox
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="nautobahn night mode"
-            android:id="@+id/nightModeNautobahn"
-            />
+            <CheckBox
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="auto launch distraction"
+                android:id="@+id/autoLaunchDistraction"
+                />
 
-        <CheckBox
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="nautobahn 1920x1080"
-            android:id="@+id/hdModeNautobahn"
-            />
+            <CheckBox
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="auto launch imulogger"
+                android:id="@+id/autoLaunchImuLogger"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="start nautobahn"
-            android:id="@+id/startNautobahn"
-            />
+            <CheckBox
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="nautobahn night mode"
+                android:id="@+id/nightModeNautobahn"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="start distraction"
-            android:id="@+id/startDistraction"
-            />
+            <CheckBox
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="nautobahn 1920x1080"
+                android:id="@+id/hdModeNautobahn"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="start fan"
-            android:id="@+id/startFan"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="start nautobahn"
+                android:id="@+id/startNautobahn"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="stop fan"
-            android:id="@+id/stopFan"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="start distraction"
+                android:id="@+id/startDistraction"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="led"
-            android:id="@+id/led"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="start fan"
+                android:id="@+id/startFan"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="ir led"
-            android:id="@+id/irLed"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="stop fan"
+                android:id="@+id/stopFan"
+                />
 
-        <Button
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="exit"
-            android:id="@+id/exit"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="led"
+                android:id="@+id/led"
+                />
 
-        <TextView
-            android:layout_width="200sp"
-            android:layout_height="40sp"
-            android:text="status"
-            android:id="@+id/status"
-            />
+            <Button
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="ir led"
+                android:id="@+id/irLed"
+                />
+
+            <TextView
+                android:layout_width="200sp"
+                android:layout_height="40sp"
+                android:text="status"
+                android:id="@+id/status"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="80sp"
+            android:layout_height="400sp"
+            android:orientation="vertical">
+
+            <Button
+                android:layout_width="80sp"
+                android:layout_height="40sp"
+                android:text="save"
+                android:id="@+id/save"
+                />
+
+            <Button
+                android:layout_width="80sp"
+                android:layout_height="40sp"
+                android:text="exit"
+                android:id="@+id/exit"
+                />
+
+        </LinearLayout>
 
     </LinearLayout>
 

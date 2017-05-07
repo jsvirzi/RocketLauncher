@@ -26,9 +26,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private static final String TAG = "RocketLauncher";
     private CheckBox checkBoxAutoLaunchNautobahn;
     private CheckBox checkBoxAutoLaunchDistraction;
+    private CheckBox checkBoxAutoLaunchImuLogger;
     private CheckBox checkBoxNightModeNautobahn;
     private CheckBox checkBoxHdModeNautobahn;
     private Button buttonExit;
+    private Button buttonSave;
     private Button buttonStartNautobahn;
     private Button buttonStartDistraction;
     private Button buttonStartFan;
@@ -43,6 +45,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private Button buttonFanSpeed;
     private static final int ActivityDogfood = 0;
     private static final int ActivityDistraction = 1;
+    private static final int ActivityImuLogger = 2;
 
     /* these need to be in lock-step with *soundIndex* */
     private final String[] sounds = new String[] {
@@ -56,7 +59,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         int resolution; /* 720 = 1280x720, 1080 = 1920x1080 */
         int nightMode; /* 0 = normal mode, 1 = night mode */
         int autoLaunch; /* 0 = no autolaunch, 1 = autolaunch */
-        int activity; /* 0 = dogfood, 1 = distraction */
+        int activity; /* 0 = dogfood, 1 = distraction, 2 = imu logger */
         static final String resolutionString = "resolution";
         static final String nightModeString = "night";
         static final String autoLaunchString = "autolaunch";
@@ -98,12 +101,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         intent.putExtra(nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
         intent.putExtra(nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
         startActivity(intent);
-//        RocketLauncher rocketLauncher = RocketLauncher.getInstance();
-//        if (nautobahnConfigurationParameters.nightMode == 0) {
-//            rocketLauncher.setIRLed(false);
-//        } else {
-//            rocketLauncher.setIRLed(true);
-//        }
+    }
+
+    public void startNautobahnImuLogger() {
+        Intent intent = new Intent();
+        intent.setAction("com.nauto.ImuLogger.action.launch");
+        startActivity(intent);
     }
 
     public void stopNautobahn() {
@@ -161,6 +164,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityDistraction);
     }
 
+    private boolean autoLaunchingNautobahnImuLogger() {
+        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityImuLogger);
+    }
+
     public void onCompletion(MediaPlayer mediaPlayer) {
         mediaPlayer.stop();
         mediaPlayer.release();
@@ -180,6 +187,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             } else if (autoLaunchingNautobahnDistraction()) {
                 startNautobahnDistraction();
                 textViewStatus.setText("starting nautobahn distraction");
+            } else if (autoLaunchingNautobahnImuLogger()) {
+                startNautobahnImuLogger();
+                textViewStatus.setText("starting nautobahn imu logger");
             }
         } else {
             textViewStatus.setText("no autostart nautobahn");
@@ -256,7 +266,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         buttonIrLed.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int maxLed = 200;
                 int action = (int) buttonIrLed.getTag();
                 if (action == 1) {
                     rocketLauncher.setIRLed(true);
@@ -302,39 +311,25 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
         checkBoxNightModeNautobahn = (CheckBox) findViewById(R.id.nightModeNautobahn);
         checkBoxNightModeNautobahn.setChecked(nautobahnConfigurationParameters.nightMode != 0);
-        checkBoxNightModeNautobahn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nautobahnConfigurationParameters.nightMode = checkBoxNightModeNautobahn.isChecked() ? 1 : 0;
-            }
-        });
 
         checkBoxHdModeNautobahn = (CheckBox) findViewById(R.id.hdModeNautobahn);
         checkBoxHdModeNautobahn.setChecked(nautobahnConfigurationParameters.resolution == 1080);
-        checkBoxHdModeNautobahn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nautobahnConfigurationParameters.resolution = checkBoxHdModeNautobahn.isChecked() ? 1080 : 720;
-            }
-        });
 
         checkBoxAutoLaunchNautobahn = (CheckBox) findViewById(R.id.autoLaunchNautobahn);
         checkBoxAutoLaunchNautobahn.setChecked((nautobahnConfigurationParameters.activity == ActivityDogfood) && (nautobahnConfigurationParameters.autoLaunch == 1));
-        checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                nautobahnConfigurationParameters.activity = ActivityDogfood;
-                nautobahnConfigurationParameters.autoLaunch = checkBoxAutoLaunchNautobahn.isChecked() ? 1 : 0;
-            }
-        });
 
         checkBoxAutoLaunchDistraction = (CheckBox) findViewById(R.id.autoLaunchDistraction);
         checkBoxAutoLaunchDistraction.setChecked((nautobahnConfigurationParameters.activity == ActivityDistraction) && (nautobahnConfigurationParameters.autoLaunch == 1));
-        checkBoxAutoLaunchNautobahn.setOnClickListener(new View.OnClickListener() {
+
+        checkBoxAutoLaunchImuLogger = (CheckBox) findViewById(R.id.autoLaunchImuLogger);
+        checkBoxAutoLaunchImuLogger.setChecked((nautobahnConfigurationParameters.activity == ActivityImuLogger) && (nautobahnConfigurationParameters.autoLaunch == 1));
+
+        buttonSave = (Button) findViewById(R.id.save);
+        buttonSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                nautobahnConfigurationParameters.activity = ActivityDistraction;
-                nautobahnConfigurationParameters.autoLaunch = checkBoxAutoLaunchDistraction.isChecked() ? 1 : 0;
+                updateParameters();
+                writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
             }
         });
 
@@ -355,5 +350,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private void stopFan() {
         RocketLauncher rocketLauncher = RocketLauncher.getInstance();
         rocketLauncher.setFan(0);
+    }
+
+    private void updateParameters() {
+        nautobahnConfigurationParameters.resolution = checkBoxHdModeNautobahn.isChecked() ? 1080 : 720;
+        nautobahnConfigurationParameters.nightMode = checkBoxNightModeNautobahn.isChecked() ? 1 : 0;
+        nautobahnConfigurationParameters.autoLaunch = 0; /* default value */
+        if (checkBoxAutoLaunchDistraction.isChecked() || checkBoxAutoLaunchNautobahn.isChecked()) {
+            nautobahnConfigurationParameters.autoLaunch = 1; /* override */
+            if (checkBoxAutoLaunchNautobahn.isChecked()) {
+                nautobahnConfigurationParameters.activity = ActivityDogfood;
+            } else if (checkBoxAutoLaunchDistraction.isChecked()) {
+                nautobahnConfigurationParameters.activity = ActivityDistraction;
+            } else if (checkBoxAutoLaunchImuLogger.isChecked()) {
+                nautobahnConfigurationParameters.activity = ActivityImuLogger;
+            }
+        }
     }
 }
