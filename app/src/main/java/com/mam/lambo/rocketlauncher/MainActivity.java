@@ -356,7 +356,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         nautobahnConfigurationParameters.resolution = checkBoxHdModeNautobahn.isChecked() ? 1080 : 720;
         nautobahnConfigurationParameters.nightMode = checkBoxNightModeNautobahn.isChecked() ? 1 : 0;
         nautobahnConfigurationParameters.autoLaunch = 0; /* default value */
-        if (checkBoxAutoLaunchDistraction.isChecked() || checkBoxAutoLaunchNautobahn.isChecked()) {
+        if (checkBoxAutoLaunchDistraction.isChecked() || checkBoxAutoLaunchNautobahn.isChecked() || checkBoxAutoLaunchImuLogger.isChecked()) {
             nautobahnConfigurationParameters.autoLaunch = 1; /* override */
             if (checkBoxAutoLaunchNautobahn.isChecked()) {
                 nautobahnConfigurationParameters.activity = ActivityDogfood;
