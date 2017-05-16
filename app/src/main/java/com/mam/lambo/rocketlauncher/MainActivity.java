@@ -29,10 +29,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private CheckBox checkBoxAutoLaunchImuLogger;
     private CheckBox checkBoxNightModeNautobahn;
     private CheckBox checkBoxHdModeNautobahn;
+    private CheckBox checkBoxExternalDnn;
+    private CheckBox checkBoxInternalDnn;
     private Button buttonExit;
     private Button buttonSave;
-    private Button buttonStartNautobahn;
-    private Button buttonStartDistraction;
+    private Button buttonStart;
     private Button buttonStartFan;
     private Button buttonStopFan;
     private Button buttonLed;
@@ -46,6 +47,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private static final int ActivityDogfood = 0;
     private static final int ActivityDistraction = 1;
     private static final int ActivityImuLogger = 2;
+    private static final int ExternalDnnMask = 1;
+    private static final int InternalDnnMask = 2;
 
     /* these need to be in lock-step with *soundIndex* */
     private final String[] sounds = new String[] {
@@ -60,10 +63,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         int nightMode; /* 0 = normal mode, 1 = night mode */
         int autoLaunch; /* 0 = no autolaunch, 1 = autolaunch */
         int activity; /* 0 = dogfood, 1 = distraction, 2 = imu logger */
+        int dnnMask; /* 1 = external, 2 = internal, 3 = external + internal */
         static final String resolutionString = "resolution";
         static final String nightModeString = "night";
         static final String autoLaunchString = "autolaunch";
         static final String activityString = "activity";
+        static final String dnnMaskString = "dnnmask";
 
         NautobahnConfigurationParameters() {
             resolution = 0;
@@ -81,31 +86,24 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         R.raw.sound3
     };
 
-    public void startNautobahnDistraction() {
+    public void startNautobahn() {
         Intent intent = new Intent();
-        intent.setAction("com.nauto.Distraction.action.launch");
-        writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
+        switch(nautobahnConfigurationParameters.activity) {
+            case ActivityDogfood:
+                intent.setAction("com.nauto.DogFood.action.launch");
+                break;
+            case ActivityDistraction:
+                intent.setAction("com.nauto.Distraction.action.launch");
+                break;
+            case ActivityImuLogger:
+                intent.setAction("com.nauto.ImuLogger.action.launch");
+                break;
+        }
+        intent.putExtra(nautobahnConfigurationParameters.dnnMaskString, nautobahnConfigurationParameters.dnnMask);
         intent.putExtra(nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
         intent.putExtra(nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
         intent.putExtra(nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
         intent.putExtra(nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
-        startActivity(intent);
-    }
-
-    public void startNautobahnDogfood() {
-        Intent intent = new Intent();
-        intent.setAction("com.nauto.DogFood.action.launch");
-        writeNautobahnConfigurationFile(nautobahnFile, nautobahnConfigurationParameters);
-        intent.putExtra(nautobahnConfigurationParameters.resolutionString, nautobahnConfigurationParameters.resolution);
-        intent.putExtra(nautobahnConfigurationParameters.nightModeString, nautobahnConfigurationParameters.nightMode);
-        intent.putExtra(nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
-        intent.putExtra(nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
-        startActivity(intent);
-    }
-
-    public void startNautobahnImuLogger() {
-        Intent intent = new Intent();
-        intent.setAction("com.nauto.ImuLogger.action.launch");
         startActivity(intent);
     }
 
@@ -126,6 +124,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         line = String.format("%s,%d\n", nautobahnConfigurationParameters.autoLaunchString, nautobahnConfigurationParameters.autoLaunch);
         Utils.writeLine(writer, line);
         line = String.format("%s,%d\n", nautobahnConfigurationParameters.activityString, nautobahnConfigurationParameters.activity);
+        Utils.writeLine(writer, line);
+        line = String.format("%s,%d\n", nautobahnConfigurationParameters.dnnMaskString, nautobahnConfigurationParameters.dnnMask);
         Utils.writeLine(writer, line);
         Utils.closeStream(writer);
     }
@@ -148,24 +148,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     parameters.autoLaunch = Utils.atoi(strings[1], 0);
                 } else if (strings[0].equals(parameters.activityString)) {
                     parameters.activity = Utils.atoi(strings[1], 0);
+                } else if (strings[0].equals(parameters.dnnMaskString)) {
+                    parameters.dnnMask = Utils.atoi(strings[1], 0);
                 }
             }
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
         return parameters;
-    }
-
-    private boolean autoLaunchingNautobahnDogfood() {
-        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityDogfood);
-    }
-
-    private boolean autoLaunchingNautobahnDistraction() {
-        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityDistraction);
-    }
-
-    private boolean autoLaunchingNautobahnImuLogger() {
-        return (nautobahnConfigurationParameters.autoLaunch == 1) && (nautobahnConfigurationParameters.activity == ActivityImuLogger);
     }
 
     public void onCompletion(MediaPlayer mediaPlayer) {
@@ -181,15 +171,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             MediaPlayer mediaPlayer = MediaPlayer.create(context, notification);
             mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.start();
-            if (autoLaunchingNautobahnDogfood()) {
-                startNautobahnDogfood();
-                textViewStatus.setText("starting nautobahn dogfood");
-            } else if (autoLaunchingNautobahnDistraction()) {
-                startNautobahnDistraction();
-                textViewStatus.setText("starting nautobahn distraction");
-            } else if (autoLaunchingNautobahnImuLogger()) {
-                startNautobahnImuLogger();
-                textViewStatus.setText("starting nautobahn imu logger");
+            if (nautobahnConfigurationParameters.autoLaunch == 1) {
+                startNautobahn();
             }
         } else {
             textViewStatus.setText("no autostart nautobahn");
@@ -277,19 +260,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         });
 
-        buttonStartNautobahn = (Button) findViewById(R.id.startNautobahn);
-        buttonStartNautobahn.setOnClickListener(new View.OnClickListener() {
+        buttonStart = (Button) findViewById(R.id.start);
+        buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startNautobahnDogfood();
-            }
-        });
-
-        buttonStartDistraction = (Button) findViewById(R.id.startDistraction);
-        buttonStartDistraction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startNautobahnDistraction();
+                startNautobahn();
             }
         });
 
@@ -323,6 +298,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
         checkBoxAutoLaunchImuLogger = (CheckBox) findViewById(R.id.autoLaunchImuLogger);
         checkBoxAutoLaunchImuLogger.setChecked((nautobahnConfigurationParameters.activity == ActivityImuLogger) && (nautobahnConfigurationParameters.autoLaunch == 1));
+
+        checkBoxExternalDnn = (CheckBox) findViewById(R.id.externalDnn);
+        checkBoxExternalDnn.setChecked((nautobahnConfigurationParameters.dnnMask & ExternalDnnMask) != 0);
+
+        checkBoxInternalDnn = (CheckBox) findViewById(R.id.internalDnn);
+        checkBoxInternalDnn.setChecked((nautobahnConfigurationParameters.dnnMask & InternalDnnMask) != 0);
 
         buttonSave = (Button) findViewById(R.id.save);
         buttonSave.setOnClickListener(new View.OnClickListener() {
@@ -365,6 +346,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             } else if (checkBoxAutoLaunchImuLogger.isChecked()) {
                 nautobahnConfigurationParameters.activity = ActivityImuLogger;
             }
+        }
+        nautobahnConfigurationParameters.dnnMask = 0;
+        if (checkBoxExternalDnn.isChecked()) {
+            nautobahnConfigurationParameters.dnnMask |= ExternalDnnMask;
+        }
+        if (checkBoxInternalDnn.isChecked()) {
+            nautobahnConfigurationParameters.dnnMask |= InternalDnnMask;
         }
     }
 }

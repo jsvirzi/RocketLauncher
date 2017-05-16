@@ -63,18 +63,18 @@
                 android:id="@+id/hdModeNautobahn"
                 />
 
-            <Button
+            <CheckBox
                 android:layout_width="200sp"
                 android:layout_height="40sp"
-                android:text="start nautobahn"
-                android:id="@+id/startNautobahn"
+                android:text="external dnn"
+                android:id="@+id/externalDnn"
                 />
 
-            <Button
+            <CheckBox
                 android:layout_width="200sp"
                 android:layout_height="40sp"
-                android:text="start distraction"
-                android:id="@+id/startDistraction"
+                android:text="internal dnn"
+                android:id="@+id/internalDnn"
                 />
 
             <Button
@@ -89,20 +89,6 @@
                 android:layout_height="40sp"
                 android:text="stop fan"
                 android:id="@+id/stopFan"
-                />
-
-            <Button
-                android:layout_width="200sp"
-                android:layout_height="40sp"
-                android:text="led"
-                android:id="@+id/led"
-                />
-
-            <Button
-                android:layout_width="200sp"
-                android:layout_height="40sp"
-                android:text="ir led"
-                android:id="@+id/irLed"
                 />
 
             <TextView
@@ -124,6 +110,27 @@
                 android:layout_height="40sp"
                 android:text="save"
                 android:id="@+id/save"
+                />
+
+            <Button
+                android:layout_width="80sp"
+                android:layout_height="40sp"
+                android:text="start"
+                android:id="@+id/start"
+                />
+
+            <Button
+                android:layout_width="80sp"
+                android:layout_height="40sp"
+                android:text="led"
+                android:id="@+id/led"
+                />
+
+            <Button
+                android:layout_width="80sp"
+                android:layout_height="40sp"
+                android:text="ir led"
+                android:id="@+id/irLed"
                 />
 
             <Button
